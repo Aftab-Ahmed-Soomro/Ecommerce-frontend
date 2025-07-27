@@ -11,9 +11,9 @@ const Home = () => {
       <BannerProduct />
       <HorizontalCardProduct category={"airpodes"} heading={"Top Airpodes"}/>
       <HorizontalCardProduct category={"camera"} heading={"Popular Cameras"}/>
-      <VerticalCardProduct category={"mobiles"} heading={"Mobiles"} />
+      <VerticalCardProduct category={"mobile"} heading={"Mobiles"} />
       <VerticalCardProduct category={"mouse"} heading={"Mouse"} />
-      <VerticalCardProduct category={"televisions"} heading={"Televisions"} />
+      <VerticalCardProduct category={"TV"} heading={"Televisions"} />
       <VerticalCardProduct category={"watches"} heading={"Watches"} />
       <VerticalCardProduct category={"earphones"} heading={"Wired Earphones"} />
       <VerticalCardProduct category={"speakers"} heading={"Blutooth Speakers"} />
