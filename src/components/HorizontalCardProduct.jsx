@@ -9,6 +9,7 @@ import Context from '../context';
 const HorizontalCardProduct = ({category, heading}) => {
     const [data,setData] = useState([]);
     const [loading,setLoading] = useState(false);
+    const [error,setError] = useState(null);
     const loadingList = new Array(13).fill(null);
     const scrollElement = useRef();
 
@@ -20,12 +21,26 @@ const HorizontalCardProduct = ({category, heading}) => {
     }
 
     const fetchData = async() => {
-      setLoading(true);
-      const categoryProduct = await fetchCategoryWiseProduct(category);
-      setLoading(false);
+      try {
+        setLoading(true);
+        setError(null);
+        const categoryProduct = await fetchCategoryWiseProduct(category);
+        setLoading(false);
 
-      console.log("Horizontal Data",categoryProduct.data);
-      setData(categoryProduct?.data)
+        console.log("Horizontal Data",categoryProduct?.data);
+        
+        if (categoryProduct?.success) {
+          setData(categoryProduct?.data || []);
+        } else {
+          setError(categoryProduct?.message || "Failed to fetch products");
+          setData([]);
+        }
+      } catch (error) {
+        console.error("Error fetching category products:", error);
+        setError("Failed to load products");
+        setData([]);
+        setLoading(false);
+      }
     }
 
     useEffect(()=> {
@@ -39,10 +54,18 @@ const HorizontalCardProduct = ({category, heading}) => {
     const scrollLeft = () => {
       scrollElement.current.scrollLeft -= 300
     }
+
+    // Ensure data is always an array
+    const safeData = Array.isArray(data) ? data : [];
+
   return (
     <div className='container mx-auto px-4 my-6 relative'>
 
         <h2 className='text-2xl font-semibold pb-4'>{heading}</h2>
+
+        {error && (
+          <p className='text-red-600 text-center py-4'>{error}</p>
+        )}
 
         <div ref={scrollElement} className='flex items-center gap-4 md:gap-6 overflow-scroll scrollBar-none transition-all'>
           <button onClick={scrollLeft} className='bg-white shadow-md rounded-full p-1 cursor-pointer absolute left-0 text-lg hidden md:block'>
@@ -55,7 +78,7 @@ const HorizontalCardProduct = ({category, heading}) => {
             loading ? (
               loadingList.map((product,index)=> {
                 return (
-                  <div className='w-full min-w-[300px] md:min-w-[340px] max-w-[300px] md:max-w-[340px] h-36 bg-white rounded-sm shadow flex'>
+                  <div key={index} className='w-full min-w-[300px] md:min-w-[340px] max-w-[300px] md:max-w-[340px] h-36 bg-white rounded-sm shadow flex'>
                     <div className='bg-slate-200 h-full p-4 min-w-[120px] md:min-w-[145px] animate-pulse'>
                         {/* <img src={product.productImage[0]} className='object-scale-down h-full hover:scale-110 transition-all cursor-pointer mix-blend-multiply' /> */}
                     </div>
@@ -72,11 +95,11 @@ const HorizontalCardProduct = ({category, heading}) => {
                 )
               })
             ) : (
-              data.map((product,index)=> {
+              safeData.map((product,index)=> {
                 return (
-                  <Link to={"/product/"+product?._id} className='w-full min-w-[300px] md:min-w-[340px] max-w-[300px] md:max-w-[340px] h-36 bg-white rounded-sm shadow flex'>
+                  <Link key={product?._id || index} to={"/product/"+product?._id} className='w-full min-w-[300px] md:min-w-[340px] max-w-[300px] md:max-w-[340px] h-36 bg-white rounded-sm shadow flex'>
                     <div className='bg-slate-200 h-full p-4 min-w-[120px] md:min-w-[145px]'>
-                        <img src={product.productImage[0]} className='object-scale-down h-full hover:scale-110 transition-all cursor-pointer mix-blend-multiply' />
+                        <img src={product?.productImage?.[0]} className='object-scale-down h-full hover:scale-110 transition-all cursor-pointer mix-blend-multiply' />
                     </div>
                     <div className='p-4 grid'>
                         <h2 className='font-medium text-base md:text-lg text-ellipsis line-clamp-1 text-black'>{product?.productName}</h2>
